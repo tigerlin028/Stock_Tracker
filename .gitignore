@@ -3,3 +3,6 @@
 
 # 个人交易数据备份（含隐私，不上传）
 stock-backup-*.json
+
+# 中文 README 仅本地留档，GitHub 只放英文版
+README.zh-CN.md
