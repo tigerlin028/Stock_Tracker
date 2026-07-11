@@ -1,0 +1,5 @@
+# 系统文件
+.DS_Store
+
+# 个人交易数据备份（含隐私，不上传）
+stock-backup-*.json

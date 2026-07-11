@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>股票追踪器</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="header-title">
+        <span class="logo">📈</span>
+        <h1>我的股票追踪器</h1>
+        <div id="backup-bar">
+          <button onclick="exportBackup()">导出备份</button>
+          <button onclick="importBackup()">导入恢复</button>
+        </div>
+      </div>
+      <div class="header-stats">
+        <div class="stat-card">
+          <span class="stat-label">持仓成本</span>
+          <span class="stat-value neutral" id="total-cost">—</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">已实现盈亏</span>
+          <span class="stat-value" id="total-realized">—</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">总手续费</span>
+          <span class="stat-value" id="total-fee">—</span>
+        </div>
+        <div class="stat-card stat-card-clickable" onclick="editCredit()" title="点击编辑">
+          <span class="stat-label">利息与奖金 ✎</span>
+          <span class="stat-value pos" id="total-credit">点击编辑</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <!-- Left panel -->
+      <div class="left-panel">
+        <section class="card">
+          <div class="form-card-header">
+            <h2 id="form-title">记录交易</h2>
+            <button class="btn-cancel-edit" id="cancel-edit" onclick="cancelEdit()" style="display:none">取消编辑</button>
+          </div>
+          <div class="type-toggle">
+            <button class="toggle-btn active" id="btn-buy"  onclick="setType('BUY')">买入</button>
+            <button class="toggle-btn"        id="btn-sell" onclick="setType('SELL')">卖出</button>
+            <button class="toggle-btn"        id="btn-div"  onclick="setType('DIV')">股息</button>
+          </div>
+          <form id="trade-form" onsubmit="handleSubmit(event)">
+            <div class="form-row">
+              <div class="form-group">
+                <label>股票代码</label>
+                <input id="f-symbol" type="text" placeholder="AAPL" autocomplete="off" required />
+              </div>
+              <div class="form-group">
+                <label>日期</label>
+                <input id="f-date" type="date" required />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label id="f-price-label">价格（$）</label>
+                <input id="f-price" type="number" placeholder="0.00" step="0.000001" min="0.000001" required />
+              </div>
+              <div class="form-group" id="shares-group">
+                <label>股数</label>
+                <input id="f-shares" type="number" placeholder="0" step="0.000001" min="0.000001" required />
+              </div>
+            </div>
+            <div class="form-group" id="fee-group" style="display:none">
+              <label>手续费（$）</label>
+              <input id="f-fee" type="number" placeholder="0.00" step="0.01" min="0" value="0" />
+            </div>
+            <button type="submit" id="submit-btn" class="btn-submit buy">确认买入</button>
+          </form>
+        </section>
+
+        <section class="card chart-card">
+          <h2>当前持仓</h2>
+          <div class="chart-wrap">
+            <canvas id="pie-chart"></canvas>
+          </div>
+          <div id="holdings-wrap" style="margin-top:16px">
+            <p class="empty-msg">暂无持仓</p>
+          </div>
+        </section>
+      </div>
+
+      <!-- Right panel -->
+      <div class="right-panel">
+        <section class="card chart-card" id="kline-section">
+          <div class="chart-header">
+            <div class="kline-header-left">
+              <h2>K 线图</h2>
+              <select id="kline-symbol-sel" class="kline-sel" onchange="onKlineSelect(this.value)">
+                <option value="">选择股票...</option>
+              </select>
+              <button class="kline-settings-btn" onclick="toggleKlineSettings()" title="API Key 设置">⚙</button>
+            </div>
+            <div class="kr-group">
+              <button id="kr-1mo" class="kr-btn" onclick="setKlineRange('1mo')">1M</button>
+              <button id="kr-3mo" class="kr-btn kr-active" onclick="setKlineRange('3mo')">3M</button>
+              <button id="kr-6mo" class="kr-btn" onclick="setKlineRange('6mo')">6M</button>
+              <button id="kr-1y"  class="kr-btn" onclick="setKlineRange('1y')">1Y</button>
+            </div>
+          </div>
+          <div id="kline-settings" class="kline-settings-panel" style="display:none">
+            <span class="kline-settings-label">Twelve Data API Key（免费 800次/天，浏览器直连稳定）</span>
+            <input id="td-key-input" type="text" class="kline-key-input" placeholder="粘贴 API Key..." />
+            <button class="kline-key-save" onclick="saveTdKey()">保存</button>
+            <a class="kline-key-link" href="https://twelvedata.com/register" target="_blank">免费获取 →</a>
+          </div>
+          <div id="kline-status" class="kline-status" style="display:none"></div>
+          <div id="kline-chart" style="height:360px;position:relative"></div>
+          <p class="kline-tip-hint">🟢 买入 &nbsp; 🔴 卖出 &nbsp;·&nbsp; 点击圆点查看成交价（折线取每日收盘价）</p>
+        </section>
+
+        <section class="card chart-card">
+          <div class="chart-header">
+            <h2>各股盈亏</h2>
+            <span class="chart-hint">拖动标签调整顺序</span>
+          </div>
+          <div id="pnl-order" class="pnl-chips"></div>
+          <div class="chart-wrap">
+            <canvas id="pnl-chart"></canvas>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="section-header">
+            <h2>交易历史</h2>
+            <button class="btn-danger" onclick="clearAll()">清空所有数据</button>
+          </div>
+          <div id="history-wrap">
+            <p class="empty-msg">暂无记录</p>
+          </div>
+        </section>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>
