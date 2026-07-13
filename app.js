@@ -669,17 +669,38 @@ function initDragAndDrop() {
 }
 
 // ── 手动备份 / 恢复 ───────────────────────────────────────────────────────────
-function exportBackup() {
+async function exportBackup() {
   const data = JSON.stringify({ trades, displayOrder, creditTotal }, null, 2);
+  const fileName = 'Trading Info.json';
+
+  // If the browser supports the File System Access API (Chrome/Edge over http/https),
+  // let the user save straight into the Stock folder and overwrite the same file.
+  if (window.showSaveFilePicker) {
+    try {
+      const handle = await window.showSaveFilePicker({
+        suggestedName: fileName,
+        types: [{ description: 'JSON', accept: { 'application/json': ['.json'] } }],
+      });
+      const writable = await handle.createWritable();
+      await writable.write(data);
+      await writable.close();
+      toast('已保存 Trading Info.json');
+      return;
+    } catch (e) {
+      if (e.name === 'AbortError') return; // user cancelled
+      // otherwise fall through to plain download
+    }
+  }
+
+  // Fallback: normal download (goes to the browser's download folder).
   const blob = new Blob([data], { type: 'application/json' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
-  const date = new Date().toISOString().slice(0, 10);
   a.href     = url;
-  a.download = `stock-backup-${date}.json`;
+  a.download = fileName;
   a.click();
   URL.revokeObjectURL(url);
-  toast('备份已下载');
+  toast('已导出 Trading Info.json');
 }
 
 function importBackup() {
