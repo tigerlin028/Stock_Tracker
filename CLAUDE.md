@@ -2,7 +2,7 @@
 
 ## 项目结构
 ```
-Stock/
+Stock_Tracker/
 ├── index.html          # 页面结构
 ├── style.css           # 样式
 ├── app.js              # 所有逻辑

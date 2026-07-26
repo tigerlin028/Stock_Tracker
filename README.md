@@ -66,7 +66,7 @@ Everything is kept in `localStorage` under the `st_` prefix:
 ## Project structure
 
 ```
-Stock/
+Stock_Tracker/
 ├── index.html          # markup
 ├── style.css           # styles
 ├── app.js              # all logic
