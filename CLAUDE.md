@@ -3,13 +3,17 @@
 ## 项目结构
 ```
 Stock/
-├── index.html   # 页面结构
-├── style.css    # 样式
-├── app.js       # 所有逻辑
-└── CLAUDE.md    # 本文件
+├── index.html          # 页面结构
+├── style.css           # 样式
+├── app.js              # 所有逻辑
+├── 启动股票追踪器.command  # 一键启动本地服务器（双击）
+└── CLAUDE.md           # 本文件
 ```
 
-纯静态网页，双击 index.html 在浏览器直接打开，无需服务器。
+纯静态网页。**推荐用本地服务器打开**：双击 `启动股票追踪器.command`（起 `python3 -m http.server 8756` 并自动打开 `http://localhost:8756/index.html`）。
+- **为什么不直接双击 index.html？** `file://` 页面被 Chrome 当作不稳定的独立来源，localStorage 会被浏览器不定期清空 → 交易数据凭空消失。`http://localhost` 是稳定来源，localStorage 持久化可靠。
+- 注意：`file://` 和 `http://localhost` 是两个不同来源，localStorage 各自独立；从 file:// 迁到 localhost 需重新导入一次备份。
+
 外部依赖（均走 CDN）：
 - Chart.js 4.4.0 —— 盈亏图、持仓占比图
 - Lightweight Charts 4.2.0（TradingView）—— K 线图
@@ -21,7 +25,8 @@ Stock/
   - `st_credit`：利息与奖金总额（数字）
   - `st_pnl_order`：各股盈亏图表的股票顺序
   - `st_td_key`：Twelve Data API Key（K 线数据源）
-- 导出备份：JSON 文件（`exportBackup()`），可跨设备导入恢复（不含 API Key）
+- 导出备份：`exportBackup()` 导出 `Trading Info.json`（支持 File System Access API 时可覆盖同一文件，否则回退普通下载），`importBackup()` 导入恢复，可跨设备（不含 API Key）
+- ⚠️ localStorage 依赖浏览器来源，务必走 localhost 打开（见项目结构说明）；养成记完交易点「导出备份」的习惯，多一层保险
 
 ## 交易记录数据结构
 ```js

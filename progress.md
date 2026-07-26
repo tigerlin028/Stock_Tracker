@@ -8,8 +8,9 @@
 - [x] 交易历史拖拽排序
 - [x] 历史记录编辑（✎按钮回填表单）
 - [x] 历史记录删除
-- [x] 导出 JSON 备份 / 导入恢复（跨设备）
+- [x] 导出备份（`Trading Info.json`，支持 File System Access API 覆盖同一文件）/ 导入恢复（跨设备）
 - [x] 清空所有数据
+- [x] 一键启动脚本 `启动股票追踪器.command`（本地服务器方式，避免 file:// 数据丢失）
 
 ### 持仓计算
 - [x] FIFO 均价算法（做T后均价反映最新持仓成本）
@@ -39,6 +40,7 @@
 - 浮动盈亏未显示（用户明确不需要，因为不记录实时价格）
 - K 线图必须联网 + 填 Twelve Data API Key 才能用；免费额度 800次/天、8次/分钟
 - 数据源踩坑记录：Yahoo Finance 无 CORS 头 + IP 限流，file:// 无法直连；免费代理全不可靠；Stooq 有 JS 反爬。结论用带 key 的 Twelve Data 直连
+- ⚠️ **数据丢失踩坑（2026-07）**：双击 `index.html` 走 `file://`，Chrome 把每个 file:// 页当独立/不稳定来源，localStorage 会被浏览器不定期清空 → 交易记录凭空消失。解决：改用 `启动股票追踪器.command` 起本地服务器，走 `http://localhost:8756` 打开，localStorage 稳定持久化。注意 file:// 与 localhost 来源不同、存储互相独立，迁移需重新导入一次备份
 
 ## 用户偏好记录
 - 不需要备注字段

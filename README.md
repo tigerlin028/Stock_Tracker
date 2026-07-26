@@ -1,8 +1,18 @@
 # Stock Tracker
 
-A lightweight, single-page stock trading tracker. Pure static web app — just double-click `index.html` to open it in your browser. No server, no build step, no install.
+A lightweight, single-page stock trading tracker. Pure static web app — no build step, no install.
 
 All data lives in your browser's `localStorage` and never leaves your machine (except the K-line price data fetched from Twelve Data).
+
+## Running it
+
+**Open it over a local server, not by double-clicking the file.**
+
+- **macOS:** double-click **`启动股票追踪器.command`** — it starts `python3 -m http.server 8756` and opens `http://localhost:8756/index.html`. Close the terminal window to stop.
+- **Any OS:** from the project folder, run `python3 -m http.server 8756` and open <http://localhost:8756/index.html>.
+
+> **Why not just double-click `index.html`?**
+> A `file://` page is treated by Chrome as an unstable, unique origin, and the browser can evict its `localStorage` at any time — your trade records would silently disappear. `http://localhost` is a stable origin where `localStorage` persists reliably. Note that `file://` and `http://localhost` are different origins with separate storage; if you're migrating, re-import your backup once on localhost.
 
 ## Features
 
@@ -18,7 +28,7 @@ All data lives in your browser's `localStorage` and never leaves your machine (e
 - **Per-stock realized P&L** bar chart (auto-sorted, draggable labels).
 - **Position allocation** doughnut chart (share of total cost).
 - **Trade history** — drag to reorder, click ✎ to edit, × to delete.
-- **Backup** — export/import a JSON file to move data across devices.
+- **Backup** — export to `Trading Info.json` / import to move data across devices (and as a safety net for your records).
 
 ## K-line data source setup
 
@@ -57,8 +67,9 @@ Everything is kept in `localStorage` under the `st_` prefix:
 
 ```
 Stock/
-├── index.html   # markup
-├── style.css    # styles
-├── app.js       # all logic
+├── index.html          # markup
+├── style.css           # styles
+├── app.js              # all logic
+├── 启动股票追踪器.command  # one-click local-server launcher (macOS)
 └── README.md
 ```
